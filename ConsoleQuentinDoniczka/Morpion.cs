@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ConsoleQuentinDoniczka;
 
 public class Morpion
@@ -93,6 +95,7 @@ public class Morpion
         }
         return Grid.EmptyCell;
     }
+    
 
     private char CheckWinner()
     {
