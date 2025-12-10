@@ -1,4 +1,5 @@
 ﻿using ConsoleQuentinDoniczka;
 
-var morpion = new Morpion();
+IDisplay display = new DisplayConsole();
+var morpion = new Morpion(display);
 morpion.Start();

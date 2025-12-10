@@ -1,33 +1,36 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace ConsoleQuentinDoniczka;
 
 public class Morpion
 {
-    private char[,] _grid;
-    private char _playerX = 'X';
-    private char _playerO = 'O';
+    private const int GridSize = 3;
+    private const char EmptyCell = ' ';
 
-    public Morpion()
+    private readonly IDisplay _display;
+    private readonly char[,] _grid;
+    private readonly char _playerX = 'X';
+    private readonly char _playerO = 'O';
+
+    public Morpion(IDisplay display)
     {
-        _grid = new char[3, 3];
+        _display = display;
+        _grid = new char[GridSize, GridSize];
         InitializeGrid();
     }
 
     private void InitializeGrid()
     {
-        for (int row = 0; row < 3; row++)
+        for (int row = 0; row < GridSize; row++)
         {
-            for (int col = 0; col < 3; col++)
+            for (int col = 0; col < GridSize; col++)
             {
-                _grid[row, col] = ' ';
+                _grid[row, col] = EmptyCell;
             }
         }
     }
 
     private void DisplayGrid()
     {
-        Display.ShowGrid(_grid);
+        _display.ShowGrid(_grid);
     }
     
 
@@ -47,10 +50,16 @@ public class Morpion
             }
 
             char winner = CheckWinner();
-            if (winner != ' ')
+            if (winner != EmptyCell)
             {
                 DisplayGrid();
-                Console.WriteLine($"Player {winner} wins!");
+                _display.ShowWinner(winner);
+                isGameRunning = false;
+            }
+            else if (IsGridFull())
+            {
+                DisplayGrid();
+                _display.ShowDraw();
                 isGameRunning = false;
             }
             else
@@ -62,15 +71,15 @@ public class Morpion
 
     private bool PlaceMove(Position2D position, char player)
     {
-        if (position.Row < 0 || position.Row > 2 || position.Col < 0 || position.Col > 2)
+        if (position.Row < 0 || position.Row >= GridSize || position.Col < 0 || position.Col >= GridSize)
         {
-            Console.WriteLine("Invalid position! Position must be between 0 and 2.");
+            _display.ShowInvalidPosition();
             return false;
         }
 
-        if (_grid[position.Row, position.Col] != ' ')
+        if (_grid[position.Row, position.Col] != EmptyCell)
         {
-            Console.WriteLine("Cell already occupied! Choose another position.");
+            _display.ShowCellOccupied();
             return false;
         }
 
@@ -83,12 +92,27 @@ public class Morpion
         return currentPlayer == _playerO ? _playerX : _playerO;
     }
 
+    private bool IsGridFull()
+    {
+        for (int row = 0; row < GridSize; row++)
+        {
+            for (int col = 0; col < GridSize; col++)
+            {
+                if (_grid[row, col] == EmptyCell)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private char CheckWinner()
     {
         // Check rows
-        for (int row = 0; row < 3; row++)
+        for (int row = 0; row < GridSize; row++)
         {
-            if (_grid[row, 0] != ' ' &&
+            if (_grid[row, 0] != EmptyCell &&
                 _grid[row, 0] == _grid[row, 1] &&
                 _grid[row, 1] == _grid[row, 2])
             {
@@ -97,9 +121,9 @@ public class Morpion
         }
 
         // Check columns
-        for (int col = 0; col < 3; col++)
+        for (int col = 0; col < GridSize; col++)
         {
-            if (_grid[0, col] != ' ' &&
+            if (_grid[0, col] != EmptyCell &&
                 _grid[0, col] == _grid[1, col] &&
                 _grid[1, col] == _grid[2, col])
             {
@@ -108,7 +132,7 @@ public class Morpion
         }
 
         // Check diagonal top left to bottom right
-        if (_grid[0, 0] != ' ' &&
+        if (_grid[0, 0] != EmptyCell &&
             _grid[0, 0] == _grid[1, 1] &&
             _grid[1, 1] == _grid[2, 2])
         {
@@ -116,35 +140,20 @@ public class Morpion
         }
 
         // Check diagonal top right to bottom left
-        if (_grid[0, 2] != ' ' &&
+        if (_grid[0, 2] != EmptyCell &&
             _grid[0, 2] == _grid[1, 1] &&
             _grid[1, 1] == _grid[2, 0])
         {
             return _grid[0, 2];
         }
 
-        return ' ';
+        return EmptyCell;
     }
 
     private Position2D GetPlayerMove(char player)
     {
-        Console.WriteLine($"Player {player}, it's your turn!");
-        Console.Write("Enter position (row col, e.g., 0 1): ");
-
-        string? input = Console.ReadLine();
-
-        var parts = input?.Split(' ');
-
-        int row = 0;
-        int col = 0;
-
-        if (parts?.Length == 2)
-        {
-            int.TryParse(parts[0], out row);
-            int.TryParse(parts[1], out col);
-        }
-
-        return new Position2D(row, col);
+        _display.ShowPlayerTurn(player);
+        return _display.GetPlayerMove(player);
     }
 
 }
