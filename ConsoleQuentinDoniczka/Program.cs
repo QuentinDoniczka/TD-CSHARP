@@ -1,3 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using ConsoleQuentinDoniczka;
 
-Console.WriteLine("Hello, World!");
+var morpion = new Morpion();
+morpion.Start();
