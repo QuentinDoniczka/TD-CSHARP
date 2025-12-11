@@ -4,11 +4,11 @@ public class Morpion
 {
     private const int GridSize = 3;
     private const char EmptyCell = ' ';
+    private const char PlayerX = 'X';
+    private const char PlayerO = 'O';
 
     private readonly IDisplay _display;
     private readonly char[,] _grid;
-    private readonly char _playerX = 'X';
-    private readonly char _playerO = 'O';
 
     public Morpion(IDisplay display)
     {
@@ -37,7 +37,7 @@ public class Morpion
     public void Start()
     {
         bool isGameRunning = true;
-        char playerTurn = _playerX;
+        char playerTurn = PlayerX;
         while (isGameRunning)
         {
             DisplayGrid();
@@ -52,21 +52,25 @@ public class Morpion
             char winner = CheckWinner();
             if (winner != EmptyCell)
             {
-                DisplayGrid();
-                _display.ShowWinner(winner);
+                EndGame(() => _display.ShowWinner(winner));
                 isGameRunning = false;
             }
             else if (IsGridFull())
             {
-                DisplayGrid();
-                _display.ShowDraw();
+                EndGame(() => _display.ShowDraw());
                 isGameRunning = false;
             }
             else
             {
-                playerTurn = SwitchPlayer(playerTurn);
+                playerTurn = GetNextPlayer(playerTurn);
             }
         }
+    }
+
+    private void EndGame(Action displayResult)
+    {
+        DisplayGrid();
+        displayResult();
     }
 
     private bool PlaceMove(Position2D position, char player)
@@ -87,9 +91,9 @@ public class Morpion
         return true;
     }
 
-    private char SwitchPlayer(char currentPlayer)
+    private char GetNextPlayer(char currentPlayer)
     {
-        return currentPlayer == _playerO ? _playerX : _playerO;
+        return currentPlayer == PlayerO ? PlayerX : PlayerO;
     }
 
     private bool IsGridFull()
@@ -107,45 +111,37 @@ public class Morpion
         return true;
     }
 
+    private char CheckThreeCells(char cell1, char cell2, char cell3)
+    {
+        if (cell1 != EmptyCell && cell1 == cell2 && cell2 == cell3)
+        {
+            return cell1;
+        }
+        return EmptyCell;
+    }
+
     private char CheckWinner()
     {
         // Check rows
         for (int row = 0; row < GridSize; row++)
         {
-            if (_grid[row, 0] != EmptyCell &&
-                _grid[row, 0] == _grid[row, 1] &&
-                _grid[row, 1] == _grid[row, 2])
-            {
-                return _grid[row, 0];
-            }
+            char winner = CheckThreeCells(_grid[row, 0], _grid[row, 1], _grid[row, 2]);
+            if (winner != EmptyCell) return winner;
         }
 
         // Check columns
         for (int col = 0; col < GridSize; col++)
         {
-            if (_grid[0, col] != EmptyCell &&
-                _grid[0, col] == _grid[1, col] &&
-                _grid[1, col] == _grid[2, col])
-            {
-                return _grid[0, col];
-            }
+            char winner = CheckThreeCells(_grid[0, col], _grid[1, col], _grid[2, col]);
+            if (winner != EmptyCell) return winner;
         }
 
-        // Check diagonal top left to bottom right
-        if (_grid[0, 0] != EmptyCell &&
-            _grid[0, 0] == _grid[1, 1] &&
-            _grid[1, 1] == _grid[2, 2])
-        {
-            return _grid[0, 0];
-        }
+        // Check diagonals
+        char diagonal1 = CheckThreeCells(_grid[0, 0], _grid[1, 1], _grid[2, 2]);
+        if (diagonal1 != EmptyCell) return diagonal1;
 
-        // Check diagonal top right to bottom left
-        if (_grid[0, 2] != EmptyCell &&
-            _grid[0, 2] == _grid[1, 1] &&
-            _grid[1, 1] == _grid[2, 0])
-        {
-            return _grid[0, 2];
-        }
+        char diagonal2 = CheckThreeCells(_grid[0, 2], _grid[1, 1], _grid[2, 0]);
+        if (diagonal2 != EmptyCell) return diagonal2;
 
         return EmptyCell;
     }
