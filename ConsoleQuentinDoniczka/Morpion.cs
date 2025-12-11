@@ -1,40 +1,31 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace ConsoleQuentinDoniczka;
 
 public class Morpion
 {
-    private char[,] _grid;
-    private char _playerX = 'X';
-    private char _playerO = 'O';
+    public const int GridSize = 3;
 
-    public Morpion()
-    {
-        _grid = new char[3, 3];
-        InitializeGrid();
-    }
+    private const char PlayerX = 'X';
+    private const char PlayerO = 'O';
 
-    private void InitializeGrid()
+    private readonly IDisplay _display;
+    private readonly Grid _grid;
+
+    public Morpion(IDisplay display)
     {
-        for (int row = 0; row < 3; row++)
-        {
-            for (int col = 0; col < 3; col++)
-            {
-                _grid[row, col] = ' ';
-            }
-        }
+        _display = display;
+        _grid = new Grid(GridSize);
     }
 
     private void DisplayGrid()
     {
-        Display.ShowGrid(_grid);
+        _display.ShowGrid(_grid.GetCells());
     }
     
 
     public void Start()
     {
         bool isGameRunning = true;
-        char playerTurn = _playerX;
+        char playerTurn = PlayerX;
         while (isGameRunning)
         {
             DisplayGrid();
@@ -47,104 +38,105 @@ public class Morpion
             }
 
             char winner = CheckWinner();
-            if (winner != ' ')
+            if (winner != Grid.EmptyCell)
             {
-                DisplayGrid();
-                Console.WriteLine($"Player {winner} wins!");
+                EndGame(() => _display.ShowWinner(winner));
+                isGameRunning = false;
+            }
+            else if (_grid.IsFull())
+            {
+                EndGame(() => _display.ShowDraw());
                 isGameRunning = false;
             }
             else
             {
-                playerTurn = SwitchPlayer(playerTurn);
+                playerTurn = GetNextPlayer(playerTurn);
             }
         }
+    }
+
+    private void EndGame(Action displayResult)
+    {
+        DisplayGrid();
+        displayResult();
     }
 
     private bool PlaceMove(Position2D position, char player)
     {
-        if (position.Row < 0 || position.Row > 2 || position.Col < 0 || position.Col > 2)
+        var result = _grid.TryPlaceSymbol(position, player);
+
+        if (result.IsFailure)
         {
-            Console.WriteLine("Invalid position! Position must be between 0 and 2.");
-            return false;
+            if (result.Error == "InvalidPosition")
+            {
+                _display.ShowInvalidPosition();
+            }
+            else if (result.Error == "CellOccupied")
+            {
+                _display.ShowCellOccupied();
+            }
         }
 
-        if (_grid[position.Row, position.Col] != ' ')
-        {
-            Console.WriteLine("Cell already occupied! Choose another position.");
-            return false;
-        }
-
-        _grid[position.Row, position.Col] = player;
-        return true;
+        return result.IsSuccess;
     }
 
-    private char SwitchPlayer(char currentPlayer)
+    private char GetNextPlayer(char currentPlayer)
     {
-        return currentPlayer == _playerO ? _playerX : _playerO;
+        return currentPlayer == PlayerO ? PlayerX : PlayerO;
+    }
+
+    private char CheckThreeCells(char cell1, char cell2, char cell3)
+    {
+        if (cell1 != Grid.EmptyCell && cell1 == cell2 && cell2 == cell3)
+        {
+            return cell1;
+        }
+        return Grid.EmptyCell;
     }
 
     private char CheckWinner()
     {
-        // Check rows
-        for (int row = 0; row < 3; row++)
-        {
-            if (_grid[row, 0] != ' ' &&
-                _grid[row, 0] == _grid[row, 1] &&
-                _grid[row, 1] == _grid[row, 2])
-            {
-                return _grid[row, 0];
-            }
-        }
+        char winner = GetWinnerFromRows();
+        if (winner != Grid.EmptyCell) return winner;
 
-        // Check columns
-        for (int col = 0; col < 3; col++)
-        {
-            if (_grid[0, col] != ' ' &&
-                _grid[0, col] == _grid[1, col] &&
-                _grid[1, col] == _grid[2, col])
-            {
-                return _grid[0, col];
-            }
-        }
+        winner = GetWinnerFromColumns();
+        if (winner != Grid.EmptyCell) return winner;
 
-        // Check diagonal top left to bottom right
-        if (_grid[0, 0] != ' ' &&
-            _grid[0, 0] == _grid[1, 1] &&
-            _grid[1, 1] == _grid[2, 2])
-        {
-            return _grid[0, 0];
-        }
+        return GetWinnerFromDiagonals();
+    }
 
-        // Check diagonal top right to bottom left
-        if (_grid[0, 2] != ' ' &&
-            _grid[0, 2] == _grid[1, 1] &&
-            _grid[1, 1] == _grid[2, 0])
+    private char GetWinnerFromRows()
+    {
+        for (int row = 0; row < GridSize; row++)
         {
-            return _grid[0, 2];
+            char winner = CheckThreeCells(_grid[row, 0], _grid[row, 1], _grid[row, 2]);
+            if (winner != Grid.EmptyCell) return winner;
         }
+        return Grid.EmptyCell;
+    }
 
-        return ' ';
+    private char GetWinnerFromColumns()
+    {
+        for (int col = 0; col < GridSize; col++)
+        {
+            char winner = CheckThreeCells(_grid[0, col], _grid[1, col], _grid[2, col]);
+            if (winner != Grid.EmptyCell) return winner;
+        }
+        return Grid.EmptyCell;
+    }
+
+    private char GetWinnerFromDiagonals()
+    {
+        char winner = CheckThreeCells(_grid[0, 0], _grid[1, 1], _grid[2, 2]);
+        if (winner != Grid.EmptyCell) return winner;
+
+        return CheckThreeCells(_grid[0, 2], _grid[1, 1], _grid[2, 0]);
     }
 
     private Position2D GetPlayerMove(char player)
     {
-        Console.WriteLine($"Player {player}, it's your turn!");
-        Console.Write("Enter position (row col, e.g., 0 1): ");
-
-        string? input = Console.ReadLine();
-
-        var parts = input?.Split(' ');
-
-        int row = 0;
-        int col = 0;
-
-        if (parts?.Length == 2)
-        {
-            int.TryParse(parts[0], out row);
-            int.TryParse(parts[1], out col);
-        }
-
-        return new Position2D(row, col);
+        _display.ShowPlayerTurn(player);
+        return _display.GetPlayerMove(player);
     }
 
 }

@@ -1,6 +1,6 @@
 # Claude context file
 claude.md
-
+.claude/
 # User-specific files
 *.rsuser
 *.suo
