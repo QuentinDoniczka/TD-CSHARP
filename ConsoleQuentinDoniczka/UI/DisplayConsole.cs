@@ -1,4 +1,6 @@
-namespace ConsoleQuentinDoniczka;
+using ConsoleQuentinDoniczka.Core;
+
+namespace ConsoleQuentinDoniczka.UI;
 
 public class DisplayConsole : IDisplay
 {
@@ -33,7 +35,7 @@ public class DisplayConsole : IDisplay
         Console.WriteLine($"Player {player}, it's your turn!");
     }
 
-    public Position2D GetPlayerMove(char player)
+    public Move GetPlayerMove(char player)
     {
         Console.Write("Enter position (row col, like: 0 1): ");
 
@@ -44,10 +46,10 @@ public class DisplayConsole : IDisplay
             int.TryParse(parts[0], out int row) &&
             int.TryParse(parts[1], out int col))
         {
-            return new Position2D(row, col);
+            return new Move(col, row);
         }
 
-        return new Position2D(-1, -1);
+        return new Move(-1, -1);
     }
 
     public void ShowInvalidPosition()
