@@ -1,4 +1,5 @@
-using System.ComponentModel.DataAnnotations;
+using ConsoleQuentinDoniczka.Core;
+using ConsoleQuentinDoniczka.Players;
 
 namespace ConsoleQuentinDoniczka;
 
@@ -11,11 +12,15 @@ public class Morpion
 
     private readonly IDisplay _display;
     private readonly Grid _grid;
+    private readonly IPlayer _playerX;
+    private readonly IPlayer _playerO;
 
     public Morpion(IDisplay display)
     {
         _display = display;
         _grid = new Grid(GridSize);
+        _playerX = new HumanPlayer(display, PlayerX);
+        _playerO = new AiPlayer(display, _grid, GridSize, PlayerO);
     }
 
     private void DisplayGrid()
@@ -27,12 +32,12 @@ public class Morpion
     public void Start()
     {
         bool isGameRunning = true;
-        char playerTurn = PlayerX;
+        IPlayer currentPlayer = _playerX;
         while (isGameRunning)
         {
             DisplayGrid();
-            Position2D position = GetPlayerMove(playerTurn);
-            bool moveSuccess = PlaceMove(position, playerTurn);
+            Move position = currentPlayer.GetMove();
+            bool moveSuccess = PlaceMove(position, currentPlayer.Symbol);
 
             if (!moveSuccess)
             {
@@ -52,7 +57,7 @@ public class Morpion
             }
             else
             {
-                playerTurn = GetNextPlayer(playerTurn);
+                currentPlayer = GetNextPlayer(currentPlayer);
             }
         }
     }
@@ -63,7 +68,7 @@ public class Morpion
         displayResult();
     }
 
-    private bool PlaceMove(Position2D position, char player)
+    private bool PlaceMove(Move position, char player)
     {
         var result = _grid.TryPlaceSymbol(position, player);
 
@@ -82,9 +87,9 @@ public class Morpion
         return result.IsSuccess;
     }
 
-    private char GetNextPlayer(char currentPlayer)
+    private IPlayer GetNextPlayer(IPlayer currentPlayer)
     {
-        return currentPlayer == PlayerO ? PlayerX : PlayerO;
+        return currentPlayer == _playerX ? _playerO : _playerX;
     }
 
     private char CheckThreeCells(char cell1, char cell2, char cell3)
@@ -136,10 +141,5 @@ public class Morpion
         return CheckThreeCells(_grid[0, 2], _grid[1, 1], _grid[2, 0]);
     }
 
-    private Position2D GetPlayerMove(char player)
-    {
-        _display.ShowPlayerTurn(player);
-        return _display.GetPlayerMove(player);
-    }
 
 }
