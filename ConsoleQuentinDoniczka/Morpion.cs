@@ -2,7 +2,6 @@ namespace ConsoleQuentinDoniczka;
 
 public class Morpion
 {
-    private const int GridSize = 3;
     private const char EmptyCell = ' ';
     private const char PlayerX = 'X';
     private const char PlayerO = 'O';
@@ -13,15 +12,15 @@ public class Morpion
     public Morpion(IDisplay display)
     {
         _display = display;
-        _grid = new char[GridSize, GridSize];
+        _grid = new char[GameConstants.GridSize, GameConstants.GridSize];
         InitializeGrid();
     }
 
     private void InitializeGrid()
     {
-        for (int row = 0; row < GridSize; row++)
+        for (int row = 0; row < GameConstants.GridSize; row++)
         {
-            for (int col = 0; col < GridSize; col++)
+            for (int col = 0; col < GameConstants.GridSize; col++)
             {
                 _grid[row, col] = EmptyCell;
             }
@@ -75,7 +74,7 @@ public class Morpion
 
     private bool PlaceMove(Position2D position, char player)
     {
-        if (position.Row < 0 || position.Row >= GridSize || position.Col < 0 || position.Col >= GridSize)
+        if (position.Row < 0 || position.Row >= GameConstants.GridSize || position.Col < 0 || position.Col >= GameConstants.GridSize)
         {
             _display.ShowInvalidPosition();
             return false;
@@ -98,9 +97,9 @@ public class Morpion
 
     private bool IsGridFull()
     {
-        for (int row = 0; row < GridSize; row++)
+        for (int row = 0; row < GameConstants.GridSize; row++)
         {
-            for (int col = 0; col < GridSize; col++)
+            for (int col = 0; col < GameConstants.GridSize; col++)
             {
                 if (_grid[row, col] == EmptyCell)
                 {
@@ -122,26 +121,23 @@ public class Morpion
 
     private char CheckWinner()
     {
-        // Check rows
-        for (int row = 0; row < GridSize; row++)
+        for (int row = 0; row < GameConstants.GridSize; row++)
         {
-            char winner = CheckThreeCells(_grid[row, 0], _grid[row, 1], _grid[row, 2]);
-            if (winner != EmptyCell) return winner;
+            char rowWin = CheckThreeCells(_grid[row, 0], _grid[row, 1], _grid[row, 2]);
+            if (rowWin != EmptyCell) return rowWin;
         }
 
-        // Check columns
-        for (int col = 0; col < GridSize; col++)
+        for (int col = 0; col < GameConstants.GridSize; col++)
         {
-            char winner = CheckThreeCells(_grid[0, col], _grid[1, col], _grid[2, col]);
-            if (winner != EmptyCell) return winner;
+            char columnWin = CheckThreeCells(_grid[0, col], _grid[1, col], _grid[2, col]);
+            if (columnWin != EmptyCell) return columnWin;
         }
 
-        // Check diagonals
-        char diagonal1 = CheckThreeCells(_grid[0, 0], _grid[1, 1], _grid[2, 2]);
-        if (diagonal1 != EmptyCell) return diagonal1;
+        char diagonalWin = CheckThreeCells(_grid[0, 0], _grid[1, 1], _grid[2, 2]);
+        if (diagonalWin != EmptyCell) return diagonalWin;
 
-        char diagonal2 = CheckThreeCells(_grid[0, 2], _grid[1, 1], _grid[2, 0]);
-        if (diagonal2 != EmptyCell) return diagonal2;
+        char antiDiagonalWin = CheckThreeCells(_grid[0, 2], _grid[1, 1], _grid[2, 0]);
+        if (antiDiagonalWin != EmptyCell) return antiDiagonalWin;
 
         return EmptyCell;
     }

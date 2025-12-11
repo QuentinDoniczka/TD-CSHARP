@@ -2,23 +2,21 @@ namespace ConsoleQuentinDoniczka;
 
 public class DisplayConsole : IDisplay
 {
-    private const int GridSize = 3;
-
     public void ShowGrid(char[,] grid)
     {
         Console.Clear();
         Console.WriteLine("      0        1        2");
-        for (int row = 0; row < GridSize; row++)
+        for (int row = 0; row < GameConstants.GridSize; row++)
         {
             Console.WriteLine("  +-------+-------+-------+");
             Console.Write(row + " |");
-            for (int col = 0; col < GridSize; col++)
+            for (int col = 0; col < GameConstants.GridSize; col++)
             {
                 Console.Write($"   {grid[row, col]}   |");
             }
             Console.WriteLine();
             Console.Write("  |");
-            for (int col = 0; col < GridSize; col++)
+            for (int col = 0; col < GameConstants.GridSize; col++)
             {
                 Console.Write("       |");
             }
@@ -52,7 +50,7 @@ public class DisplayConsole : IDisplay
 
     public void ShowInvalidPosition()
     {
-        Console.WriteLine($"Invalid position! Position must be between 0 and {GridSize - 1}.");
+        Console.WriteLine($"Invalid position! Position must be between 0 and {GameConstants.GridSize - 1}.");
     }
 
     public void ShowCellOccupied()
