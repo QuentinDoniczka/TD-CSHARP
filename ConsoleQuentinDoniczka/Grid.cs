@@ -4,6 +4,9 @@ public class Grid
 {
     public const char EmptyCell = ' ';
 
+    private const string ErrorInvalidPosition = "InvalidPosition";
+    private const string ErrorCellOccupied = "CellOccupied";
+
     private readonly int _size;
     private readonly char[,] _cells;
 
@@ -29,20 +32,20 @@ public class Grid
         }
     }
 
-    public bool TryPlaceSymbol(Position2D position, char symbol)
+    public Utils.Result TryPlaceSymbol(Position2D position, char symbol)
     {
         if (!IsValidPosition(position))
         {
-            return false;
+            return Utils.Result.Failure(ErrorInvalidPosition);
         }
 
         if (!IsEmptyCell(position))
         {
-            return false;
+            return Utils.Result.Failure(ErrorCellOccupied);
         }
 
         _cells[position.Row, position.Col] = symbol;
-        return true;
+        return Utils.Result.Success();
     }
 
     public bool IsValidPosition(Position2D position)

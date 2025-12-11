@@ -63,19 +63,21 @@ public class Morpion
 
     private bool PlaceMove(Position2D position, char player)
     {
-        if (!_grid.IsValidPosition(position))
+        var result = _grid.TryPlaceSymbol(position, player);
+
+        if (result.IsFailure)
         {
-            _display.ShowInvalidPosition();
-            return false;
+            if (result.Error == "InvalidPosition")
+            {
+                _display.ShowInvalidPosition();
+            }
+            else if (result.Error == "CellOccupied")
+            {
+                _display.ShowCellOccupied();
+            }
         }
 
-        if (!_grid.IsEmptyCell(position))
-        {
-            _display.ShowCellOccupied();
-            return false;
-        }
-
-        return _grid.TryPlaceSymbol(position, player);
+        return result.IsSuccess;
     }
 
     private char GetNextPlayer(char currentPlayer)
