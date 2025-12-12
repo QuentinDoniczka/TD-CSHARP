@@ -75,4 +75,23 @@ public class Grid
         }
         return true;
     }
+
+    public List<Move> GetEmptyCells()
+    {
+        var emptyCells = new List<Move>();
+
+        for (int row = 0; row < _size; row++)
+        {
+            for (int col = 0; col < _size; col++)
+            {
+                var move = new Move(col, row);
+                if (IsEmptyCell(move))
+                {
+                    emptyCells.Add(move);
+                }
+            }
+        }
+
+        return emptyCells;
+    }
 }

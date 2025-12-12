@@ -23,6 +23,14 @@ public class Morpion
         _playerO = new AiPlayer(display, _grid, GridSize, PlayerO);
     }
 
+    public Morpion(IDisplay display, IPlayer playerX, IPlayer playerO)
+    {
+        _display = display;
+        _grid = new Grid(GridSize);
+        _playerX = playerX;
+        _playerO = playerO;
+    }
+
     private void DisplayGrid()
     {
         _display.ShowGrid(_grid.GetCells());
