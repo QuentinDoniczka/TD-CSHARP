@@ -1,7 +1,16 @@
-namespace ConsoleQuentinDoniczka;
+using ConsoleQuentinDoniczka.Core;
+using ConsoleQuentinDoniczka.Input;
+
+namespace ConsoleQuentinDoniczka.UI;
 
 public class DisplayConsole : IDisplay
 {
+    private readonly IUserInput _userInput;
+
+    public DisplayConsole(IUserInput userInput)
+    {
+        _userInput = userInput;
+    }
     public void ShowGrid(char[,] grid)
     {
         int gridSize = grid.GetLength(0);
@@ -33,21 +42,10 @@ public class DisplayConsole : IDisplay
         Console.WriteLine($"Player {player}, it's your turn!");
     }
 
-    public Position2D GetPlayerMove(char player)
+    public Move GetPlayerMove(char player)
     {
         Console.Write("Enter position (row col, like: 0 1): ");
-
-        string? input = Console.ReadLine();
-        var parts = input?.Split(' ');
-
-        if (parts?.Length == 2 &&
-            int.TryParse(parts[0], out int row) &&
-            int.TryParse(parts[1], out int col))
-        {
-            return new Position2D(row, col);
-        }
-
-        return new Position2D(-1, -1);
+        return _userInput.ReadMove();
     }
 
     public void ShowInvalidPosition()

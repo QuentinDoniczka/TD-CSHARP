@@ -1,0 +1,1 @@
+https://stryker-mutator.io/docs/stryker-net/getting-started/
