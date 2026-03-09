@@ -14,9 +14,9 @@ public class HumanPlayer : IPlayer
         Symbol = symbol;
     }
 
-    public Move GetMove()
+    public Task<Move> GetMove()
     {
         _display.ShowPlayerTurn(Symbol);
-        return _display.GetPlayerMove(Symbol);
+        return Task.FromResult(_display.GetPlayerMove(Symbol));
     }
 }

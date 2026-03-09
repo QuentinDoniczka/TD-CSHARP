@@ -37,14 +37,14 @@ public class Morpion
     }
     
 
-    public void Start()
+    public async Task Start()
     {
         bool isGameRunning = true;
         IPlayer currentPlayer = _playerX;
         while (isGameRunning)
         {
             DisplayGrid();
-            Move position = currentPlayer.GetMove();
+            Move position = await currentPlayer.GetMove();
             bool moveSuccess = PlaceMove(position, currentPlayer.Symbol);
 
             if (!moveSuccess)

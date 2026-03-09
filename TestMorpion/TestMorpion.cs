@@ -8,7 +8,7 @@ namespace TestProject1;
 public class TestMorpion
 {
     [Fact]
-    public void Start_WhenPlayerXWinsHorizontally_ShouldShowWinner()
+    public async Task Start_WhenPlayerXWinsHorizontally_ShouldShowWinner()
     {
         var fakeDisplay = new FakeDisplay();
         var fakePlayerX = new FakePlayer('X', new[]
@@ -24,7 +24,7 @@ public class TestMorpion
         });
         var morpion = new Morpion(fakeDisplay, fakePlayerX, fakePlayerO);
 
-        morpion.Start();
+        await morpion.Start();
 
         fakeDisplay.WinnerShown.Should().Be('X');
         fakeDisplay.ShowWinnerCallCount.Should().Be(1);
@@ -32,7 +32,7 @@ public class TestMorpion
     }
 
     [Fact]
-    public void Start_WhenGameIsDraw_ShouldShowDraw()
+    public async Task Start_WhenGameIsDraw_ShouldShowDraw()
     {
         var fakeDisplay = new FakeDisplay();
         var fakePlayerX = new FakePlayer('X', new[]
@@ -52,7 +52,7 @@ public class TestMorpion
         });
         var morpion = new Morpion(fakeDisplay, fakePlayerX, fakePlayerO);
 
-        morpion.Start();
+        await morpion.Start();
 
         fakeDisplay.ShowDrawCallCount.Should().Be(1);
         fakeDisplay.ShowWinnerCallCount.Should().Be(0);
@@ -120,13 +120,13 @@ public class FakePlayer : IPlayer
         _moves = new Queue<Move>(moves);
     }
 
-    public Move GetMove()
+    public Task<Move> GetMove()
     {
         if (_moves.Count > 0)
         {
-            return _moves.Dequeue();
+            return Task.FromResult(_moves.Dequeue());
         }
 
-        return new Move(-1, -1);
+        return Task.FromResult(new Move(-1, -1));
     }
 }

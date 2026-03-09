@@ -18,10 +18,13 @@ public class AiPlayer : IPlayer
         _random = new Random();
     }
 
-    public Move GetMove()
+    public async Task<Move> GetMove()
     {
         _display.ShowPlayerTurn(Symbol);
-        Task.Delay(1000).Wait();
+
+        int delayMs = _random.Next(500, 1501);
+        await Task.Delay(delayMs);
+
         var emptyCells = _grid.GetEmptyCells();
         int randomIndex = _random.Next(emptyCells.Count);
         return emptyCells[randomIndex];

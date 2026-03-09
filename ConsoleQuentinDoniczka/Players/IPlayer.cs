@@ -5,5 +5,5 @@ namespace ConsoleQuentinDoniczka.Players;
 public interface IPlayer
 {
     char Symbol { get; }
-    Move GetMove();
+    Task<Move> GetMove();
 }
