@@ -55,10 +55,10 @@ public class DisplayConsole : IDisplay
         Console.WriteLine($"Player {player}, it's your turn!");
     }
 
-    public Move GetPlayerMove(char player)
+    public UserAction GetPlayerAction(char player)
     {
-        Console.Write("Enter position (row col, like: 0 1) you can also use save or load: ");
-        return _userInput.ReadMove();
+        Console.Write("Enter position (row col, like: 0 1), save or quit: ");
+        return _userInput.ReadAction();
     }
 
     public void ShowInvalidPosition()

@@ -86,7 +86,7 @@ public class FakeDisplay : IDisplay
         LastPlayerTurnShown = player;
     }
 
-    public Move GetPlayerMove(char player)
+    public UserAction GetPlayerAction(char player)
     {
         throw new NotImplementedException();
     }
@@ -133,13 +133,13 @@ public class FakePlayer : IPlayer
         _moves = new Queue<Move>(moves);
     }
 
-    public Task<Move> GetMove()
+    public Task<UserAction> GetAction()
     {
         if (_moves.Count > 0)
         {
-            return Task.FromResult(_moves.Dequeue());
+            return Task.FromResult(UserAction.FromMove(_moves.Dequeue()));
         }
 
-        return Task.FromResult(new Move(-1, -1));
+        return Task.FromResult(UserAction.Invalid);
     }
 }

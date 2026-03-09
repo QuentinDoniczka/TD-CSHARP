@@ -4,5 +4,5 @@ namespace ConsoleQuentinDoniczka.Input;
 
 public interface IUserInput
 {
-    Move ReadMove();
+    UserAction ReadAction();
 }

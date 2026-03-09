@@ -18,7 +18,7 @@ public class AiPlayer : IPlayer
         _random = new Random();
     }
 
-    public async Task<Move> GetMove()
+    public async Task<UserAction> GetAction()
     {
         _display.ShowPlayerTurn(Symbol);
 
@@ -27,6 +27,6 @@ public class AiPlayer : IPlayer
 
         var emptyCells = _grid.GetEmptyCells();
         int randomIndex = _random.Next(emptyCells.Count);
-        return emptyCells[randomIndex];
+        return UserAction.FromMove(emptyCells[randomIndex]);
     }
 }

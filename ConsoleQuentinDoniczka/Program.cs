@@ -1,4 +1,5 @@
 using ConsoleQuentinDoniczka;
+using ConsoleQuentinDoniczka.Core;
 using ConsoleQuentinDoniczka.Data;
 using ConsoleQuentinDoniczka.Data.Migrations;
 using ConsoleQuentinDoniczka.Input;
@@ -28,6 +29,10 @@ while (playAgain)
     var stats = await historyService.GetStatsAsync();
     var morpion = new Morpion(display, stats, saveService);
     var result = await morpion.Start();
+
+    if (result == GameResult.Quit)
+        break;
+
     await historyService.RecordGameAsync(result);
 
     display.ShowPlayAgainPrompt();

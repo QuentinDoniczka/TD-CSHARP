@@ -4,5 +4,6 @@ public enum GameResult
 {
     HumanWin,
     BotWin,
-    Draw
+    Draw,
+    Quit
 }

@@ -9,7 +9,7 @@ public interface IDisplay
     void ShowHistory(GameStats stats);
     void ShowGrid(char[,] grid);
     void ShowPlayerTurn(char player);
-    Move GetPlayerMove(char player);
+    UserAction GetPlayerAction(char player);
     void ShowInvalidPosition();
     void ShowCellOccupied();
     void ShowWinner(char winner);

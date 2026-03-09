@@ -49,25 +49,32 @@ public class Morpion
 
     public async Task<GameResult> Start()
     {
-        IPlayer currentPlayer = _playerX;
+        IPlayer currentPlayer = await TryLoadGame() ?? _playerX;
+
         while (true)
         {
             DisplayGrid();
-            Move position = await currentPlayer.GetMove();
+            UserAction action = await currentPlayer.GetAction();
 
-            if (position == Move.Save)
+            switch (action.Type)
             {
-                await HandleSave(currentPlayer.Symbol);
-                continue;
+                case UserActionType.Save:
+                    await HandleSave(currentPlayer.Symbol);
+                    continue;
+
+                case UserActionType.Quit:
+                    await HandleSave(currentPlayer.Symbol);
+                    return GameResult.Quit;
+
+                case UserActionType.Invalid:
+                    _display.ShowInvalidPosition();
+                    continue;
+
+                case UserActionType.PlayMove:
+                    break;
             }
 
-            if (position == Move.Load)
-            {
-                currentPlayer = await HandleLoad() ?? currentPlayer;
-                continue;
-            }
-
-            bool moveSuccess = PlaceMove(position, currentPlayer.Symbol);
+            bool moveSuccess = PlaceMove(action.Move!, currentPlayer.Symbol);
 
             if (!moveSuccess)
             {
@@ -93,27 +100,23 @@ public class Morpion
         }
     }
 
+    private async Task<IPlayer?> TryLoadGame()
+    {
+        if (_saveService == null) return null;
+
+        var save = await _saveService.LoadAsync();
+        if (save == null) return null;
+
+        _grid.LoadState(save.GridState);
+        _display.ShowGameLoaded();
+        return save.CurrentSymbol == PlayerX ? _playerX : _playerO;
+    }
+
     private async Task HandleSave(char currentSymbol)
     {
         if (_saveService == null) return;
         await _saveService.SaveAsync(_grid.GetState(), currentSymbol);
         _display.ShowGameSaved();
-    }
-
-    private async Task<IPlayer?> HandleLoad()
-    {
-        if (_saveService == null) return null;
-
-        var save = await _saveService.LoadAsync();
-        if (save == null)
-        {
-            _display.ShowNoSaveFound();
-            return null;
-        }
-
-        _grid.LoadState(save.GridState);
-        _display.ShowGameLoaded();
-        return save.CurrentSymbol == PlayerX ? _playerX : _playerO;
     }
 
     private bool PlaceMove(Move position, char player)
@@ -148,7 +151,6 @@ public class Morpion
         }
         return Grid.EmptyCell;
     }
-    
 
     private char CheckWinner()
     {
@@ -188,6 +190,4 @@ public class Morpion
 
         return CheckThreeCells(_grid[0, 2], _grid[1, 1], _grid[2, 0]);
     }
-
-
 }
