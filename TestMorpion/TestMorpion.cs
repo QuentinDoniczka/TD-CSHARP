@@ -1,6 +1,7 @@
 using ConsoleQuentinDoniczka;
 using ConsoleQuentinDoniczka.Core;
 using ConsoleQuentinDoniczka.Players;
+using ConsoleQuentinDoniczka.Services;
 using FluentAssertions;
 
 namespace TestProject1;
@@ -70,6 +71,10 @@ public class FakeDisplay : IDisplay
     public char? WinnerShown { get; private set; }
     public char? LastPlayerTurnShown { get; private set; }
 
+    public void ClearScreen() { }
+
+    public void ShowHistory(GameStats stats) { }
+
     public void ShowGrid(char[,] grid)
     {
         ShowGridCallCount++;
@@ -81,7 +86,7 @@ public class FakeDisplay : IDisplay
         LastPlayerTurnShown = player;
     }
 
-    public Move GetPlayerMove(char player)
+    public UserAction GetPlayerAction(char player)
     {
         throw new NotImplementedException();
     }
@@ -106,6 +111,14 @@ public class FakeDisplay : IDisplay
     {
         ShowDrawCallCount++;
     }
+
+    public void ShowPlayAgainPrompt() { }
+
+    public void ShowGameSaved() { }
+
+    public void ShowGameLoaded() { }
+
+    public void ShowNoSaveFound() { }
 }
 
 public class FakePlayer : IPlayer
@@ -120,13 +133,13 @@ public class FakePlayer : IPlayer
         _moves = new Queue<Move>(moves);
     }
 
-    public Task<Move> GetMove()
+    public Task<UserAction> GetAction()
     {
         if (_moves.Count > 0)
         {
-            return Task.FromResult(_moves.Dequeue());
+            return Task.FromResult(UserAction.FromMove(_moves.Dequeue()));
         }
 
-        return Task.FromResult(new Move(-1, -1));
+        return Task.FromResult(UserAction.Invalid);
     }
 }

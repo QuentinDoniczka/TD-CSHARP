@@ -1,5 +1,6 @@
 using ConsoleQuentinDoniczka.Core;
 using ConsoleQuentinDoniczka.Input;
+using ConsoleQuentinDoniczka.Services;
 
 namespace ConsoleQuentinDoniczka.UI;
 
@@ -11,11 +12,23 @@ public class DisplayConsole : IDisplay
     {
         _userInput = userInput;
     }
+
+    public void ClearScreen()
+    {
+        Console.Clear();
+    }
+
+    public void ShowHistory(GameStats stats)
+    {
+        Console.WriteLine("=== Historique ===");
+        Console.WriteLine($"Parties: {stats.TotalGames} | Victoires Humain (X): {stats.HumanWins} | Victoires Bot (O): {stats.BotWins} | Nuls: {stats.Draws}");
+        Console.WriteLine();
+    }
+
     public void ShowGrid(char[,] grid)
     {
         int gridSize = grid.GetLength(0);
 
-        Console.Clear();
         Console.WriteLine("      0        1        2");
         for (int row = 0; row < gridSize; row++)
         {
@@ -42,10 +55,10 @@ public class DisplayConsole : IDisplay
         Console.WriteLine($"Player {player}, it's your turn!");
     }
 
-    public Move GetPlayerMove(char player)
+    public UserAction GetPlayerAction(char player)
     {
-        Console.Write("Enter position (row col, like: 0 1): ");
-        return _userInput.ReadMove();
+        Console.Write("Enter position (row col, like: 0 1), save or quit: ");
+        return _userInput.ReadAction();
     }
 
     public void ShowInvalidPosition()
@@ -66,5 +79,25 @@ public class DisplayConsole : IDisplay
     public void ShowDraw()
     {
         Console.WriteLine("It's a draw! No one wins.");
+    }
+
+    public void ShowPlayAgainPrompt()
+    {
+        Console.Write("Rejouer ? (o/n) : ");
+    }
+
+    public void ShowGameSaved()
+    {
+        Console.WriteLine("Partie sauvegardee !");
+    }
+
+    public void ShowGameLoaded()
+    {
+        Console.WriteLine("Partie chargee !");
+    }
+
+    public void ShowNoSaveFound()
+    {
+        Console.WriteLine("Aucune sauvegarde trouvee.");
     }
 }

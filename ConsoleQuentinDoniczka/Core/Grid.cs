@@ -76,6 +76,22 @@ public class Grid
         return true;
     }
 
+    public string GetState()
+    {
+        var chars = new char[_size * _size];
+        for (int row = 0; row < _size; row++)
+            for (int col = 0; col < _size; col++)
+                chars[row * _size + col] = _cells[row, col];
+        return new string(chars);
+    }
+
+    public void LoadState(string state)
+    {
+        for (int row = 0; row < _size; row++)
+            for (int col = 0; col < _size; col++)
+                _cells[row, col] = state[row * _size + col];
+    }
+
     public List<Move> GetEmptyCells()
     {
         var emptyCells = new List<Move>();
