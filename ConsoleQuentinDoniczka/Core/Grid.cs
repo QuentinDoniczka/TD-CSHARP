@@ -1,3 +1,5 @@
+using ConsoleQuentinDoniczka.Core;
+
 namespace ConsoleQuentinDoniczka;
 
 public class Grid
@@ -32,7 +34,7 @@ public class Grid
         }
     }
 
-    public Utils.Result TryPlaceSymbol(Position2D position, char symbol)
+    public Utils.Result TryPlaceSymbol(Move position, char symbol)
     {
         if (!IsValidPosition(position))
         {
@@ -48,13 +50,13 @@ public class Grid
         return Utils.Result.Success();
     }
 
-    public bool IsValidPosition(Position2D position)
+    public bool IsValidPosition(Move position)
     {
         return position.Row >= 0 && position.Row < _size &&
                position.Col >= 0 && position.Col < _size;
     }
 
-    public bool IsEmptyCell(Position2D position)
+    public bool IsEmptyCell(Move position)
     {
         return _cells[position.Row, position.Col] == EmptyCell;
     }
@@ -72,5 +74,24 @@ public class Grid
             }
         }
         return true;
+    }
+
+    public List<Move> GetEmptyCells()
+    {
+        var emptyCells = new List<Move>();
+
+        for (int row = 0; row < _size; row++)
+        {
+            for (int col = 0; col < _size; col++)
+            {
+                var move = new Move(col, row);
+                if (IsEmptyCell(move))
+                {
+                    emptyCells.Add(move);
+                }
+            }
+        }
+
+        return emptyCells;
     }
 }
