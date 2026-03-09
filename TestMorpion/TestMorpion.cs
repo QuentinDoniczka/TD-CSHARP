@@ -1,6 +1,7 @@
 using ConsoleQuentinDoniczka;
 using ConsoleQuentinDoniczka.Core;
 using ConsoleQuentinDoniczka.Players;
+using ConsoleQuentinDoniczka.Services;
 using FluentAssertions;
 
 namespace TestProject1;
@@ -70,6 +71,10 @@ public class FakeDisplay : IDisplay
     public char? WinnerShown { get; private set; }
     public char? LastPlayerTurnShown { get; private set; }
 
+    public void ClearScreen() { }
+
+    public void ShowHistory(GameStats stats) { }
+
     public void ShowGrid(char[,] grid)
     {
         ShowGridCallCount++;
@@ -106,6 +111,14 @@ public class FakeDisplay : IDisplay
     {
         ShowDrawCallCount++;
     }
+
+    public void ShowPlayAgainPrompt() { }
+
+    public void ShowGameSaved() { }
+
+    public void ShowGameLoaded() { }
+
+    public void ShowNoSaveFound() { }
 }
 
 public class FakePlayer : IPlayer

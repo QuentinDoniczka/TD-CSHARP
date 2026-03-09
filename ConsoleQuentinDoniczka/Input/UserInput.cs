@@ -6,7 +6,11 @@ public class UserInput : IUserInput
 {
     public Move ReadMove()
     {
-        string? input = Console.ReadLine();
+        string? input = Console.ReadLine()?.Trim().ToLower();
+
+        if (input == "save") return Move.Save;
+        if (input == "load") return Move.Load;
+
         var parts = input?.Split(' ');
 
         if (parts?.Length == 2 &&

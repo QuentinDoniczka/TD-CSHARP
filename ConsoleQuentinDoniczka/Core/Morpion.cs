@@ -1,5 +1,6 @@
 using ConsoleQuentinDoniczka.Core;
 using ConsoleQuentinDoniczka.Players;
+using ConsoleQuentinDoniczka.Services;
 
 namespace ConsoleQuentinDoniczka;
 
@@ -14,37 +15,58 @@ public class Morpion
     private readonly Grid _grid;
     private readonly IPlayer _playerX;
     private readonly IPlayer _playerO;
+    private readonly GameStats? _stats;
+    private readonly IGameSaveService? _saveService;
 
-    public Morpion(IDisplay display)
+    public Morpion(IDisplay display, GameStats? stats = null, IGameSaveService? saveService = null)
     {
         _display = display;
         _grid = new Grid(GridSize);
         _playerX = new HumanPlayer(display, PlayerX);
         _playerO = new AiPlayer(display, _grid, GridSize, PlayerO);
+        _stats = stats;
+        _saveService = saveService;
     }
 
-    public Morpion(IDisplay display, IPlayer playerX, IPlayer playerO)
+    public Morpion(IDisplay display, IPlayer playerX, IPlayer playerO, GameStats? stats = null)
     {
         _display = display;
         _grid = new Grid(GridSize);
         _playerX = playerX;
         _playerO = playerO;
+        _stats = stats;
     }
 
     private void DisplayGrid()
     {
+        _display.ClearScreen();
+        if (_stats != null)
+        {
+            _display.ShowHistory(_stats);
+        }
         _display.ShowGrid(_grid.GetCells());
     }
-    
 
-    public async Task Start()
+    public async Task<GameResult> Start()
     {
-        bool isGameRunning = true;
         IPlayer currentPlayer = _playerX;
-        while (isGameRunning)
+        while (true)
         {
             DisplayGrid();
             Move position = await currentPlayer.GetMove();
+
+            if (position == Move.Save)
+            {
+                await HandleSave(currentPlayer.Symbol);
+                continue;
+            }
+
+            if (position == Move.Load)
+            {
+                currentPlayer = await HandleLoad() ?? currentPlayer;
+                continue;
+            }
+
             bool moveSuccess = PlaceMove(position, currentPlayer.Symbol);
 
             if (!moveSuccess)
@@ -55,25 +77,43 @@ public class Morpion
             char winner = CheckWinner();
             if (winner != Grid.EmptyCell)
             {
-                EndGame(() => _display.ShowWinner(winner));
-                isGameRunning = false;
+                DisplayGrid();
+                _display.ShowWinner(winner);
+                return winner == PlayerX ? GameResult.HumanWin : GameResult.BotWin;
             }
-            else if (_grid.IsFull())
+
+            if (_grid.IsFull())
             {
-                EndGame(() => _display.ShowDraw());
-                isGameRunning = false;
+                DisplayGrid();
+                _display.ShowDraw();
+                return GameResult.Draw;
             }
-            else
-            {
-                currentPlayer = GetNextPlayer(currentPlayer);
-            }
+
+            currentPlayer = GetNextPlayer(currentPlayer);
         }
     }
 
-    private void EndGame(Action displayResult)
+    private async Task HandleSave(char currentSymbol)
     {
-        DisplayGrid();
-        displayResult();
+        if (_saveService == null) return;
+        await _saveService.SaveAsync(_grid.GetState(), currentSymbol);
+        _display.ShowGameSaved();
+    }
+
+    private async Task<IPlayer?> HandleLoad()
+    {
+        if (_saveService == null) return null;
+
+        var save = await _saveService.LoadAsync();
+        if (save == null)
+        {
+            _display.ShowNoSaveFound();
+            return null;
+        }
+
+        _grid.LoadState(save.GridState);
+        _display.ShowGameLoaded();
+        return save.CurrentSymbol == PlayerX ? _playerX : _playerO;
     }
 
     private bool PlaceMove(Move position, char player)
